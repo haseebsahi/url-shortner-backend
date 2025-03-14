@@ -3,23 +3,29 @@ import { ShortenerService } from './shortener.service';
 import { CreateShortUrlDto } from './dto/create-short-url-dto/create-short-url-dto';
 import { ShortUrl } from './entities/short-url.entity/short-url.entity';
 
-@Controller('shortener')
+@Controller()
 export class ShortenerController {
   constructor(private readonly shortenerService: ShortenerService) {}
 
-  @Post()
+  @Post('shorten')
   async createShortUrl(@Body() createShortUrlDto: CreateShortUrlDto) {
     return this.shortenerService.shortenUrl(createShortUrlDto);
   }
 
-  @Get()
+  @Get('list')
   getAllUrls(): ShortUrl[] {
     return this.shortenerService.getAllUrls();
   }
 
-  @Get(':shortUrl')
-  // @Redirect()
-  async redirectShortUrl(@Param('shortUrl') shortUrl: string) {
+  @Get('analytics/:shortId')
+  async getAnalytics(@Param('shortId') shortUrl: string) {
+    const urlObj = this.shortenerService.findUrlByShortUrl(shortUrl);
+    return urlObj?.clicks ?? 0;
+  }
+
+  @Get(':shortId')
+  @Redirect()
+  async redirectShortUrl(@Param('shortId') shortUrl: string) {
     const urlObj = await this.shortenerService.findUrlByShortUrl(shortUrl);
     const originalUrl = urlObj?.originalUrl;
     if (originalUrl) {
