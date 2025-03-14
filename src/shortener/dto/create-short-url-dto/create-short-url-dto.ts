@@ -1,1 +1,4 @@
-export class CreateShortUrlDto {}
+export class CreateShortUrlDto {
+    originalUrl: string;
+    customAlias?: string;
+}
