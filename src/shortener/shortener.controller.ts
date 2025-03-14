@@ -5,30 +5,27 @@ import { ShortUrl } from './entities/short-url.entity/short-url.entity';
 
 @Controller('shortener')
 export class ShortenerController {
-    constructor(private readonly shortenerService: ShortenerService) {}
+  constructor(private readonly shortenerService: ShortenerService) {}
 
-    @Post()
-    async createShortUrl(@Body() createShortUrlDto: CreateShortUrlDto) {
-        return this.shortenerService.shortenUrl(createShortUrlDto);
-    }
+  @Post()
+  async createShortUrl(@Body() createShortUrlDto: CreateShortUrlDto) {
+    return this.shortenerService.shortenUrl(createShortUrlDto);
+  }
 
-    @Get()
-    getAllUrls(): ShortUrl[] {
-        return this.shortenerService.getAllUrls();
-    }
+  @Get()
+  getAllUrls(): ShortUrl[] {
+    return this.shortenerService.getAllUrls();
+  }
 
-    @Get(':shortUrl')
-    @Redirect()
-    async redirectShortUrl(@Param('shortUrl') shortUrl: string) {
-        console.log("get request received...")
-        const urlObj = await this.shortenerService.findUrlByShortUrl(shortUrl);
-        const originalUrl = urlObj?.originalUrl;
-        console.log("originalUrl: ", originalUrl)
-        if (originalUrl) {
-            await this.shortenerService.incrementClickCount(shortUrl);
-            return { url: originalUrl };
-        }
-        console.log("check 2")
-        return { url: 'http://example.com/404' }; // Redirect to a 404 page or similar
+  @Get(':shortUrl')
+  @Redirect()
+  async redirectShortUrl(@Param('shortUrl') shortUrl: string) {
+    const urlObj = await this.shortenerService.findUrlByShortUrl(shortUrl);
+    const originalUrl = urlObj?.originalUrl;
+    if (originalUrl) {
+      await this.shortenerService.incrementClickCount(shortUrl);
+      return { url: originalUrl };
     }
+    return { url: 'http://example.com/404' }; // Redirect to a 404 page or similar
+  }
 }
