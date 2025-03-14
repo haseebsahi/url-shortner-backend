@@ -22,7 +22,11 @@ export class ShortenerService {
 
     generateId(): string {
         return Math.random().toString(36).substr(2, 9);
-      }
+    }
+
+    getAllUrls(): ShortUrl[] {
+        return this.shortUrls;
+    }
   
     findUrlByShortUrl(shortUrl: string): ShortUrl | undefined {
         console.log("shortUrls: ", this.shortUrls)

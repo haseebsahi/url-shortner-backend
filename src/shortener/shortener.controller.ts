@@ -1,6 +1,7 @@
 import { Body, Controller, Get, Param, Post, Redirect } from '@nestjs/common';
 import { ShortenerService } from './shortener.service';
 import { CreateShortUrlDto } from './dto/create-short-url-dto/create-short-url-dto';
+import { ShortUrl } from './entities/short-url.entity/short-url.entity';
 
 @Controller('shortener')
 export class ShortenerController {
@@ -11,8 +12,13 @@ export class ShortenerController {
         return this.shortenerService.shortenUrl(createShortUrlDto);
     }
 
+    @Get()
+    getAllUrls(): ShortUrl[] {
+        return this.shortenerService.getAllUrls();
+    }
+
     @Get(':shortUrl')
-    // @Redirect()
+    @Redirect()
     async redirectShortUrl(@Param('shortUrl') shortUrl: string) {
         console.log("get request received...")
         const urlObj = await this.shortenerService.findUrlByShortUrl(shortUrl);
