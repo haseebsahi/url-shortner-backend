@@ -18,7 +18,7 @@ export class ShortenerController {
   }
 
   @Get(':shortUrl')
-  @Redirect()
+  // @Redirect()
   async redirectShortUrl(@Param('shortUrl') shortUrl: string) {
     const urlObj = await this.shortenerService.findUrlByShortUrl(shortUrl);
     const originalUrl = urlObj?.originalUrl;
