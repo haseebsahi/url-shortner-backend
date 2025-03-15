@@ -17,6 +17,12 @@ export class ShortenerController {
     return this.shortenerService.getAllUrls();
   }
 
+  @Get('original/:shortId')
+  async getOriginal(@Param('shortId') shortUrl: string) {
+    const urlObj = await this.shortenerService.findUrlByShortUrl(shortUrl);
+    return { url: urlObj?.originalUrl };
+  }
+
   @Get('analytics/:shortId')
   async getAnalytics(@Param('shortId') shortUrl: string) {
     const urlObj = this.shortenerService.findUrlByShortUrl(shortUrl);
