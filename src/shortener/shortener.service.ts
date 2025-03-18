@@ -1,40 +1,45 @@
+// filepath: d:\url-shortner-backend\src\shortener\shortener.service.ts
 import { Injectable } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
 import { CreateShortUrlDto } from './dto/create-short-url-dto/create-short-url-dto';
-import { ShortUrl } from './entities/short-url.entity/short-url.entity';
-import { v4 as uuidv4 } from 'uuid';
+import { ShortUrl } from './schemas/short-url.schema';
 
 @Injectable()
 export class ShortenerService {
-  private shortUrls: ShortUrl[] = [];
+  constructor(
+    @InjectModel(ShortUrl.name) private shortUrlModel: Model<ShortUrl>,
+  ) {}
 
-  shortenUrl(createShortUrlDto: CreateShortUrlDto): ShortUrl {
-    const shortUrl: ShortUrl = {
+  async shortenUrl(createShortUrlDto: CreateShortUrlDto): Promise<ShortUrl> {
+    const shortUrl = new this.shortUrlModel({
       id: this.generateId(),
       originalUrl: createShortUrlDto.originalUrl,
       shortUrl: this.generateShortUrl(),
       clicks: 0,
       createdAt: new Date(),
-    };
-    this.shortUrls.push(shortUrl);
-    return shortUrl;
+    });
+    return shortUrl.save();
   }
 
   generateId(): string {
     return Math.random().toString(36).substr(2, 9);
   }
 
-  getAllUrls(): ShortUrl[] {
-    return this.shortUrls;
+  async getAllUrls(): Promise<ShortUrl[]> {
+    return this.shortUrlModel.find().exec();
   }
 
-  findUrlByShortUrl(shortUrl: string): ShortUrl | undefined {
-    return this.shortUrls.find((url) => url.shortUrl === shortUrl);
+  async findUrlByShortUrl(shortUrl: string): Promise<ShortUrl | undefined> {
+    const result = await this.shortUrlModel.findOne({ shortUrl }).exec();
+    return result || undefined;
   }
 
-  incrementClickCount(shortUrl: string): void {
-    const url = this.findUrlByShortUrl(shortUrl);
+  async incrementClickCount(shortUrl: string): Promise<void> {
+    const url = await this.findUrlByShortUrl(shortUrl);
     if (url) {
       url.clicks++;
+      await url.save();
     }
   }
 

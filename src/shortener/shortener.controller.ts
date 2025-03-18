@@ -13,8 +13,8 @@ export class ShortenerController {
   }
 
   @Get('list')
-  getAllUrls(): ShortUrl[] {
-    return this.shortenerService.getAllUrls();
+  async getAllUrls(): Promise<ShortUrl[]> {
+    return await this.shortenerService.getAllUrls();
   }
 
   @Get('original/:shortId')
@@ -25,7 +25,7 @@ export class ShortenerController {
 
   @Get('analytics/:shortId')
   async getAnalytics(@Param('shortId') shortUrl: string) {
-    const urlObj = this.shortenerService.findUrlByShortUrl(shortUrl);
+    const urlObj = await this.shortenerService.findUrlByShortUrl(shortUrl);
     return urlObj?.clicks ?? 0;
   }
 
