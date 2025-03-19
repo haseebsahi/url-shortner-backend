@@ -1,14 +1,15 @@
-// filepath: d:\url-shortner-backend\src\shortener\shortener.service.ts
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { CreateShortUrlDto } from './dto/create-short-url-dto/create-short-url-dto';
 import { ShortUrl } from './schemas/short-url.schema';
+import { RedisService } from 'src/services/redis.service';
 
 @Injectable()
 export class ShortenerService {
   constructor(
     @InjectModel(ShortUrl.name) private shortUrlModel: Model<ShortUrl>,
+    private readonly redisService: RedisService,
   ) {}
 
   async shortenUrl(createShortUrlDto: CreateShortUrlDto): Promise<ShortUrl> {
@@ -31,7 +32,18 @@ export class ShortenerService {
   }
 
   async findUrlByShortUrl(shortUrl: string): Promise<ShortUrl | undefined> {
+    // Check cache first
+    const cachedUrl = await this.redisService.get(shortUrl);
+    if (cachedUrl) {
+      return this.shortUrlModel.hydrate(JSON.parse(cachedUrl));
+    }
+
+    // If not in cache, fetch from database
     const result = await this.shortUrlModel.findOne({ shortUrl }).exec();
+    if (result) {
+      // Cache the result
+      await this.redisService.set(shortUrl, JSON.stringify(result), 3600); // Cache for 1 hour
+    }
     return result || undefined;
   }
 
@@ -40,6 +52,8 @@ export class ShortenerService {
     if (url) {
       url.clicks++;
       await url.save();
+      // Update the cache
+      await this.redisService.set(shortUrl, JSON.stringify(url), 3600); // Cache for 1 hour
     }
   }
 

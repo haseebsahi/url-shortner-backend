@@ -3,6 +3,8 @@ import { ShortenerController } from './shortener.controller';
 import { ShortenerService } from './shortener.service';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ShortUrl, ShortUrlSchema } from './schemas/short-url.schema';
+import { RedisService } from 'src/services/redis.service';
+import { ConfigService } from '@nestjs/config';
 
 @Module({
   imports: [
@@ -11,6 +13,6 @@ import { ShortUrl, ShortUrlSchema } from './schemas/short-url.schema';
     ]),
   ],
   controllers: [ShortenerController],
-  providers: [ShortenerService],
+  providers: [ShortenerService, RedisService, ConfigService],
 })
 export class ShortenerModule {}
